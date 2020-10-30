@@ -76,14 +76,13 @@ class ResComp:
         self.ridge_alpha = ridge_alpha
         self.sparse_res  = sparse_res
         self.spect_rad   = spect_rad
-        self.is_trained  = False
         self.mean_degree = mean_degree
         self.res_sz      = res_sz
         self.min_weight  = min_weight
         self.max_weight  = max_weight
         self.uniform_weights = uniform_weights
         self.batchsize = batchsize
-
+        self.is_trained  = False
 
         # Make reservoir adjacency matrix based on number of arguments to __init__
         # No non-keyword arguments:
@@ -120,6 +119,7 @@ class ResComp:
     def set_res_data_members(self):
         """ Ensure that the datamembers match the composition of the reservoir """
         self.res_sz = self.res.shape[0]
+        self.r0 = 2*np.random.rand(self.res_sz) - 1.0
         self.mean_degree = np.sum(self.res != 0)/(self.res_sz)
         # W_in initialized from a uniform distribution on [-1, 1]
         self.W_in = 2*(np.random.rand(self.res_sz, self.signal_dim) - 0.5)
@@ -278,6 +278,7 @@ class ResComp:
             # Update Rhat and Yhat
             self.Rhat += states.T @ states
             self.Yhat += Ui[:-1, :].T @ states
+        self.r0 = r0
 
     def solve_wout(self):
         """ Solve the Tikhonov regularized least squares problem (Ridge regression)

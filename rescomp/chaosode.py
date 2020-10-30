@@ -3,16 +3,28 @@ from scipy import integrate
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+def unpack(X, cols=True):
+    """ Unpacks 2d numpy arrays """
+    if type(X) is np.ndarray:
+        if len(X.shape) > 1:
+            m, n = X.shape
+            if cols:
+                unpack = tuple([np.reshape(X[:,i], (m, 1)) for i in range(n)])
+            else:
+                unpack = tuple([X[i, ] for i in range(m)])
+            return unpack
+    return X
+
 
 def lorenz(t, X, sigma=10., beta=8./3, rho=28.0):
     """Compute the time-derivative of a Lorenz system."""
-    (x, y, z) = X
-    return [sigma * (y - x), x * (rho - z) - y, x * y - beta * z]
+    (x, y, z) = unpack(X)
+    return np.hstack((sigma * (y - x), x * (rho - z) - y, x * y - beta * z))
 
 def rossler(t, X):
     """ Compute the time derivative of the Rossler System """
-    (x, y, z) = X
-    return [-1 * (y + z), x + y / 5, 0.2 + z * (x - 5.7)]
+    (x, y, z) = unpack(X)
+    return np.hstack((-1 * (y + z), x + y / 5, 0.2 + z * (x - 5.7)))
 
 def thomas(t, X, b=0.1998):
     """ Compute time derivative of Thomas' cyclically symmetric system
@@ -20,8 +32,8 @@ def thomas(t, X, b=0.1998):
             circuits: Analysis, synthesis, ‘labyrinth chaos’,” Int. J.
             of Bifurcation and Chaos 9, 1889–1905.
     """
-    (x, y, z) = X
-    return [np.sin(y) - b * x, np.sin(z) - b * y, np.sin(x) - b * z]
+    (x, y, z) = unpack(X)
+    return np.hstack((np.sin(y) - b * x, np.sin(z) - b * y, np.sin(x) - b * z))
 
 SYSTEMS = {
     "lorenz" : {
