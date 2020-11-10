@@ -16,7 +16,7 @@ class ResComp:
         0 arguments: Initializes the reservoir as a random graph with all other
                      datamembers determined by keyword arguments
         1 argument:  Assumes argument to be an adjacency matrix. Makes the internal
-                     reservoir equal to the argement. Matrix properties take precidence
+                     reservoir equal to the argement. Matrix properties take precedence
                      over keyword arguments. i.e. If `A` is dense, `ResComp(A, sparse_res=True)`
                      will have a dense reservoir matrix.
 
