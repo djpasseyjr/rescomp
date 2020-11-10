@@ -1,8 +1,10 @@
+
 import numpy as np
 import networkx as nx
 from scipy import sparse
 from scipy.interpolate import CubicSpline
 from scipy import integrate
+from scipy import optimize
 from warnings import warn
 from math import floor
 
@@ -186,6 +188,14 @@ class ResComp:
         """ Reservoir prediction ode. Assumes precomputed W_out """
         return self.gamma*(-1*r + self.activ_f(self.res @ r + self.sigma * self.W_in @ (self.W_out @ r)))
 
+    def initial_condition(self, u0):
+        """ Function to map external system initial conditions to reservoir initial conditions """
+        #u = lambda x: u0
+        #fixed_res_f = lambda r: self.res_f(0, r, u)
+        #r0 = optimize.fsolve(fixed_res_f, np.random.rand(self.res_sz))
+        r0 = self.activ_f(self.W_in @ u0)
+        return r0
+
     #-------------------------------------
     # Default reservoir topology
     #-------------------------------------
@@ -204,6 +214,10 @@ class ResComp:
         # Remove self edges
         for i in range(n):
              A[i,i] = 0.0
+        # Add one loop to ensure positive spectral radius
+        if n > 1:
+            A[0, 1] = self.weights(1)
+            A[1, 0] = self.weights(1)
         return A
 
     #---------------------------
@@ -268,7 +282,7 @@ class ResComp:
         # the internal states are generated
         idxs = [(i, i + self.batchsize + 1) for i in range(0, len(t), self.batchsize)]
         # Set initial condition for reservoir nodes
-        r0 = self.W_in @ U[0, :]
+        r0 = self.initial_condition(U[0, :])
         for start, end in idxs:
             ti = t[start:end]
             Ui = U[start:end, :]
@@ -287,10 +301,12 @@ class ResComp:
         W_out = self.Yhat @ np.linalg.inv(self.Rhat + self.ridge_alpha * np.eye(self.res_sz))
         return W_out
 
-    def predict(self, t, u0, r0=None, return_states=False):
+    def predict(self, t, u0=None, r0=None, return_states=False):
         # Determine initial condition
-        if r0 is None:
-            r0 = self.W_in @ u0
+        if (u0 is not None):
+            r0 = self.initial_condition(u0)
+        elif r0 is None :
+            r0 = self.r0
         if not self.is_trained:
             raise Exception("Reservoir is untrained")
         states = integrate.odeint(self.res_pred_f, r0, t, tfirst=True)
