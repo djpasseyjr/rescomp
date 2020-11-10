@@ -40,10 +40,26 @@ def system_fit_error(t, U, system, order="inf"):
 def train_test_orbit(system, duration=10, dt=0.01, trainper=0.5, trim=True):
     """ Returns a time scale and orbit of length `duration` split into two pieces:
             tr, Utr, ts, Uts
-        where `tr` contains `trainper` percent of the total orbit.
-        Therefore the output of numpy.vstack((Utr, Uts)) is an unbroken orbit
-        from the given system.
-        By default trims off the portion of the orbit that is not on the attractor.
+            where `tr` contains `trainper` percent of the total orbit.
+            The output of numpy.vstack((Utr, Uts)) will be an unbroken orbit
+            from the given system.
+        Parameters
+        ----------
+            system (str): A builtin rescomp system name ["rossler", "thomas", "lorenz"]
+            duration (float): How long of an orbit
+                Defaults to 10.0
+            dt (float): Stepsize in time (For numerical integration)
+                Defaults to 0.01
+            trainper (float): Must be between 0 and 1. Percent of the orbit to place in training data
+                Defaults to 0.5.
+            trim (bool): If true, return an orbit of lenfth duration on the attractor. Otherwise,
+                include the pre attractor orbit. (Defaults to True)
+        Returns
+        -------
+            tr (ndarray): 1 dimensional array of time values corresponding to training orbit
+            Utr (ndarray): 2 dimensional training orbit. Utr[i, :] is the state of the system at time tr[i]
+            ts (ndarray): 1 dimensional array of time values corresponding to test orbit
+            Uts (ndarray): 2 dimensional test orbit. Uts[i, :] is the state of the system at time ts[i]
     """
     t, U = rc.orbit(system, duration=duration, dt=dt, trim=trim)
 
