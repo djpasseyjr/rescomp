@@ -91,7 +91,7 @@ def plot3d(U, color=None):
     plt.show()
     return color
 
-def plot2d(U, t, color=None):
+def plot2d(t, U, color=None):
     if color is None:
         color = np.random.rand(U.shape[1], 3)
     for i, c in enumerate(color):
