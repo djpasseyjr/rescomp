@@ -190,10 +190,10 @@ class ResComp:
 
     def initial_condition(self, u0):
         """ Function to map external system initial conditions to reservoir initial conditions """
-        #u = lambda x: u0
-        #fixed_res_f = lambda r: self.res_f(0, r, u)
-        #r0 = optimize.fsolve(fixed_res_f, np.random.rand(self.res_sz))
-        r0 = self.activ_f(self.W_in @ u0)
+        u = lambda x: u0
+        fixed_res_f = lambda r: self.res_f(0, r, u)
+        r0 = optimize.fsolve(fixed_res_f, np.random.rand(self.res_sz))
+        #r0 = self.activ_f(self.W_in @ u0)
         return r0
 
     #-------------------------------------

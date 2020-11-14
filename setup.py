@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="DJ Passey",
     author_email="djpasseyjr@unc.edu",
-    description="A reservoir computer and chaotic systems",
+    description="A reservoir computer and chaotic systems package",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/djpasseyjr/rescomp",
