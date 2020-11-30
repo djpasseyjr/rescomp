@@ -7,6 +7,11 @@ from scipy import integrate
 from scipy import optimize
 from warnings import warn
 from math import floor
+import numdifftools as ndt
+
+## Notes
+# Better variable names
+# Set input/training signal dim automatically
 
 class ResComp:
     """ Reservoir Computer Class
@@ -50,6 +55,10 @@ class ResComp:
                                  Defaults to 0.0
         batchsize:       (Int) Maximum length of training batch.
                                  Defaults to 2000
+        map_initial      (str) How to pick an initial reservoir node condition. One of
+                         ['fixed point', 'relax', activ_f', 'psuedoinverse', 'random', 'W_in'].
+                         See documentation of self.initial_condition for details
+                                 Defaults to "relax"
 
         ** Note that adjacency matrix weights are scaled after initialization
         to achive desired spectral radius **
@@ -68,7 +77,8 @@ class ResComp:
                  signal_dim=3,
                  max_weight=2,
                  min_weight=0,
-                 batchsize=2000
+                 batchsize=2000,
+                 map_initial="relax"
                 ):
         # Set model data members
         self.signal_dim  = signal_dim
@@ -85,6 +95,7 @@ class ResComp:
         self.uniform_weights = uniform_weights
         self.batchsize = batchsize
         self.is_trained  = False
+        self.map_initial = map_initial
 
         # Make reservoir adjacency matrix based on number of arguments to __init__
         # No non-keyword arguments:
@@ -180,20 +191,85 @@ class ResComp:
     #-------------------------------------
     # ODEs governing reervoir node states
     #-------------------------------------
-    def res_f(self, t, r, u):
+    def res_ode(self, t, r, u):
         """ ODE to drive the reservoir node states with u(t) """
         return self.gamma * (-1 * r + self.activ_f(self.res @ r + self.sigma * self.W_in @ u(t)))
 
-    def res_pred_f(self, t, r):
+    def trained_res_ode(self, t, r):
         """ Reservoir prediction ode. Assumes precomputed W_out """
         return self.gamma*(-1*r + self.activ_f(self.res @ r + self.sigma * self.W_in @ (self.W_out @ r)))
 
+    def jacobian(self, t, r, u, trained=True):
+        """ The jacobian matrix of the untrained reservoir ode w.r.t. r. That is, if
+                dr/dt = F(t, r, u)
+                Jij = dF_i/dr_j
+            Parameters:
+                t (float): Time value
+                r (ndarray): Array of length `self.res_sz` reservoir node state
+                u (callable): function that accepts `t` and returns an ndarray of length `self.signal_dim`
+            Returns:
+                Jnum (callable): Accepts a node state r (ndarray of length `self.res_sz') and returns a
+                (`self.res_sz` x `self.res_sz`) array of partial derivatives (Computed numerically
+                with finite differences). See `numdifftools.Jacobian`
+        """
+        if trained:
+            f = lambda r : self.trained_res_ode(t, r, u)
+        else:
+            f = lambda r : self.res_ode(t, r, u)
+        Jnum = ndt.Jacobian(f)
+        return Jnum
+
     def initial_condition(self, u0):
-        """ Function to map external system initial conditions to reservoir initial conditions """
-        u = lambda x: u0
-        fixed_res_f = lambda r: self.res_f(0, r, u)
-        r0 = optimize.fsolve(fixed_res_f, np.random.rand(self.res_sz))
-        #r0 = self.activ_f(self.W_in @ u0)
+        """ Function to map external system initial conditions to reservoir initial conditions
+            Options are set by changing the value of self.map_initial. The options work as follows:
+            "fixed point"
+                This sets the initial reservoir node condition to the fixed point induced by the initial
+                state of the training signal. Theoretically, this should eliminate transience in the node state.
+                The nonlinear root finder is sensitive to initial conditions and may not converge.
+            "relax"
+                This method allows the reservoir nodes to relax into a steady state corresponding to `u0`.
+                This typically conincided with the fixed point above but unlike the nonlinear solver, this method
+                always converged.
+            "activ_f"
+                This sets the reservoir initial condition to r0 = activ_f(W_in @ u0). Incidentally, should send
+                the reservoir initial condition close to the attracting fixed points of the system
+            "pseudoinverse"
+                Only for use after training. This uses the pseudoinverse of W_out to compute the initial node
+                state from an inital condition from the learned system
+            "random"
+                Sets node states at random. Draws from [-1,1] for tanh and sin activation functions and [0, 1]
+                otherwise.
+        """
+        if self.map_initial == "fixed point":
+            u = lambda x: u0
+            fixed_res_ode = lambda r: self.res_ode(0, r, u)
+            r0 = optimize.fsolve(fixed_res_ode, np.ones(self.res_sz))
+        elif self.map_initial == "relax":
+            u = lambda x: u0
+            fixed_res_ode = lambda r: self.res_ode(0, r, u)
+            initial = 2*np.random.rand(self.res_sz) - 1
+            tvals = np.linspace(0, 10000, 100)
+            R = integrate.odeint(self.res_ode, initial, tvals, tfirst=True, args=(u,))
+            r0 = R[-1,:]
+            err = np.max(np.abs(r0 - R[-2, :]))
+            if  err > 1e-12:
+                warn(f"Reservoir fixed point failed to converge. ||r_n - r_(n+1)|| = {err}")
+        elif self.map_initial == "activ_f":
+            r0 = self.activ_f(self.W_in @ u0)
+        elif self.map_initial == "pseudoinverse":
+            if not self.is_trained:
+                raise ValueError("Cannot use `map_initial='pseudoinverse'` because the reservoir is untrained")
+            W = self.W_out
+            r0 = np.linalg.inv(W.T @ W) @ (W.T @ u0)
+        elif self.map_initial == "random":
+            if (self.activ_f == np.tanh) or (self.activ_f == np.sin):
+                r0 = 2*np.random.rand(self.res_sz) - 1
+            else:
+                r0 = np.random.rand(self.res_sz)
+        elif self.map_initial == "W_in":
+            r0 = self.W_in @ u0
+        else:
+            raise ValueError(f"The value of `map_initial`='{self.map_initial}'. It must be in ['fixed point', 'relax', activ_f', 'psuedoinverse', 'random', 'W_in'], or it must be callable.")
         return r0
 
     #-------------------------------------
@@ -266,7 +342,7 @@ class ResComp:
 
         """
         u = CubicSpline(t, U)
-        states = integrate.odeint(self.res_f, r0, t, tfirst=True, args=(u,))
+        states = integrate.odeint(self.res_ode, r0, t, tfirst=True, args=(u,))
         return states
 
     def update_tikhanov_factors(self, t, U):
@@ -309,7 +385,7 @@ class ResComp:
             r0 = self.r0
         if not self.is_trained:
             raise Exception("Reservoir is untrained")
-        states = integrate.odeint(self.res_pred_f, r0, t, tfirst=True)
+        states = integrate.odeint(self.trained_res_ode, r0, t, tfirst=True)
         pred = self.W_out @ states.T
         # Return internal states as well as predicition or not
         if return_states:
