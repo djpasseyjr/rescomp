@@ -1,7 +1,7 @@
-# `rescomp`: Reservoir computers and Chaotic Systems
+# Reservoir computers and Chaotic Systems
 
 This package contains an ode based reservoir computer for learning time series data.
-The package also includes functions for generating and plotting time series data from three chaotic systems.
+The package also includes functions for generating and plotting time series data for three chaotic systems.
 
 ## Installation
 The package is hosted on PyPi and can be installed with pip:
@@ -22,7 +22,7 @@ Currently, we support code to generate time series on three chaotic attractors. 
 t, U = rc.orbit("thomas", duration=1000, dt=0.1)
 fig = rc.plot3d(U)
 ```
-![Thomas' cyclically symmetric attractor](./images/thomas.png)
+![Thomas' cyclically symmetric attractor](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/thomas.png)
 
  2. The Rossler attractor
 
@@ -31,7 +31,7 @@ t, U = rc.orbit("rossler", duration=100, dt=0.01)
 fig = rc.plot3d(U)
 ```
 
-![Rossler attractor](./images/rossler.png)
+![Rossler attractor](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/rossler.png)
 
 
  3. The Lorenz attractor
@@ -40,7 +40,7 @@ fig = rc.plot3d(U)
 t, U = rc.orbit("lorenz", duration=100, dt=0.01)
 fig = rc.plot3d(U)
 ```
-![Lorenz attractor](./images/lorenz.png)
+![Lorenz attractor](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/lorenz.png)
 
 ## Reservoir Computer Class
 
@@ -67,7 +67,7 @@ pre = rcomp_default.predict(ts, r0=r0)
 fig = rc.plot3d(pre)
 ```
 
-![Prediction with default parameters. (Not so good)](./images/defaultrcomp.png)
+![Prediction with default parameters. (Not so good)](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/defaultrcomp.png)
 
 This doesn't look much like Thomas' attractor, suggesting that these parameters are not optimal.
 
@@ -87,7 +87,7 @@ r0 = rcomp.r0
 pre = rcomp.predict(ts, r0=r0)
 fig = rc.plot3d(pre)
 ```
-![Prediction with optimized parameters. (Good!)](./images/optrcomp.png)
+![Prediction with optimized parameters. (Good!)](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/optrcomp.png)
 This prediction looks much more like Thomas' attractor.
 
 ## Conclusion
