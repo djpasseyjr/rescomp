@@ -41,21 +41,48 @@ SYSTEMS = {
         "domain_shift" : [-10, -10, 10],
         "signal_dim" : 3,
         "time_to_attractor" : 40.0,
-        "df" : lorenz
+        "df" : lorenz,
+        "rcomp_params" : {
+                        "res_sz" : 1000,
+                        "activ_f" : lambda x: 1/(1 + np.exp(-1*x)),
+                        "gamma" : 5.632587,
+                        "mean_degree" : 0.21,
+                        "ridge_alpha" : 2e-7,
+                        "sigma" : 0.078,
+                        "spect_rad" : 14.6
+        }
     },
     "rossler" : {
         "domain_scale" : [10, 10, 0],
         "domain_shift" : [-5, -5, 0],
         "signal_dim" : 3,
         "time_to_attractor" : 40.0,
-        "df" : rossler
+        "df" : rossler,
+        "rcomp_params" : {
+                        "res_sz" : 1000,
+                        "activ_f" : lambda x: 1/(1 + np.exp(-1*x)),
+                        "gamma" : 19.1,
+                        "mean_degree" : 2.0,
+                        "ridge_alpha" : 6e-7,
+                        "sigma" : 0.063,
+                        "spect_rad" : 8.472
+        }
     },
     "thomas" : {
         "domain_scale" : [-2, -2, -2],
         "domain_shift" : [-2, -2, -2],
         "signal_dim" : 3,
         "time_to_attractor" : 100.0,
-        "df" : thomas
+        "df" : thomas,
+        "rcomp_params" : {
+                        "res_sz" : 1000,
+                        "activ_f" : lambda x: 1/(1 + np.exp(-1*x)),
+                        "gamma" : 12.6,
+                        "mean_degree" : 2.2,
+                        "ridge_alpha" : 5e-4,
+                        "sigma" : 1.5,
+                        "spect_rad" : 12.0
+        }
     }
 }
 

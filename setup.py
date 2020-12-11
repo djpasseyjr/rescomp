@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="rescomp-djpassey",
+    name="rescomp",
     version="0.0.1",
     author="DJ Passey",
     author_email="djpasseyjr@unc.edu",
@@ -16,6 +16,20 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
+        "Topic :: Machine Learning :: Time Series"
+    ],
+    install_requires=[
+        'numpy',
+        'networkx',
+        'scipy',
+        'warnings'
+        'math',
+        'numdifftools',
+        'matplotlib',
+        'findiff'
     ],
     python_requires='>=3.6',
+    test_suite='nose.collector',
+    tests_require=['nose', 'itertools'],
+    include_package_data=True
 )
