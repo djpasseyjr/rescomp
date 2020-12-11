@@ -88,6 +88,7 @@ pre = rcomp.predict(ts, r0=r0)
 fig = rc.plot3d(pre)
 ```
 ![Prediction with optimized parameters. (Good!)](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/optrcomp.png)
+
 This prediction looks much more like Thomas' attractor.
 
 ## Conclusion
