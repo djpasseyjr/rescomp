@@ -68,8 +68,11 @@ fig = rc.plot3d(pre)
 ```
 
 ![Prediction with default parameters. (Not so good)](./images/defaultrcomp.png)
+
+This doesn't look much like Thomas' attractor, suggesting that these parameters are not optimal.
+
 #### Reservoir Hyperparameters
-Optimized hyper parameters for each system are included in the package. Initialize a reservoir with optimized hyper parameters.
+Optimized hyper parameters for each system are included in the package. Initialize a reservoir with optimized hyper parameters as follows:
 
 ```
 hyper_parameters = rc.SYSTEMS["thomas"]["rcomp_params"]
@@ -85,7 +88,7 @@ pre = rcomp.predict(ts, r0=r0)
 fig = rc.plot3d(pre)
 ```
 ![Prediction with optimized parameters. (Good!)](./images/optrcomp.png)
-
+This prediction looks much more like Thomas' attractor.
 
 ## Conclusion
 
