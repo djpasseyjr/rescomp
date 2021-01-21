@@ -1,4 +1,4 @@
-# Reservoir computers and Chaotic Systems
+# Reservoir Computers and Chaotic Systems
 
 This package contains an ode based reservoir computer for learning time series data.
 The package also includes functions for generating and plotting time series data for three chaotic systems.
