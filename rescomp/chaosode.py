@@ -4,7 +4,17 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 def unpack(X, cols=True):
-    """ Unpacks 2d numpy arrays """
+    """ Splits 2d numpy arrays into tuples 
+        Parameters
+        ----------
+        X (ndarray): 2d numpy array
+        cols (bool): If True, split the array into column vectors, if false split it into row vectors
+        
+        Returns
+        -------
+        unpack (tuple): A tuple of the rows of X or a tuple of the columns of X. 
+            If X is not a 2d numpy array, unpack=X.
+    """
     if type(X) is np.ndarray:
         if len(X.shape) > 1:
             m, n = X.shape
@@ -94,6 +104,22 @@ def random_initial(system):
     return u0
 
 def orbit(system, initial=None, duration=10, dt=0.01, trim=False):
+    """ Returns the orbit of a given system.
+       
+        Parameters
+        ----------
+        system (str): A supported dynamical system from ["lorenz", "thomas", "rossler"]
+        initial (ndarray): An initial condition for the system. Defaults to a random choice.
+        duration (float): Time duration of the orbit (default duration=10 means 10 seconds)
+        dt (float): Timestep size. Default dt=0.01
+        trim (bool): Option to trim off transient portion of the orbit (To ensure the orbit 
+            is on the chaotic attractor for the full duration.)
+            
+        Returns
+        -------
+        U (ndarray): mxn numpy array where m is the number of timesteps (duration x dt) and n is 
+            dimension of the system (probably 3).
+    """
     transient_timesteps = 0
     time_to_attractor = 0
     if initial is None:
@@ -102,9 +128,12 @@ def orbit(system, initial=None, duration=10, dt=0.01, trim=False):
         time_to_attractor = SYSTEMS[system]["time_to_attractor"]
         transient_timesteps = int(time_to_attractor / dt)
     timesteps = int(duration / dt) + 1
+    # Make enough timesteps so that the transients can be trimmed leaving a full duration orbit
     t = np.linspace(0, time_to_attractor + duration, transient_timesteps + timesteps)
+    # Locate the correct derivative function
     df = SYSTEMS[system]["df"]
     U = integrate.odeint(df, initial, t, tfirst=True)
+    # Trim off transient states
     U, t = U[transient_timesteps: , :], t[transient_timesteps:]
     return t, U
 
