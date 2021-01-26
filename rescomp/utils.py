@@ -16,7 +16,7 @@ def relerr(true, pre, order=2, axis=0):
     return norm(true - pre, axis=axis) / norm(true, axis=axis)
 
 def accduration(true, pre, tol=0.2, order="inf", axis=0):
-    warn("The function `rescomp.accduration` is depreciated. Use `rescomp.validpredictiontime` instead")
+    warn("The function `rescomp.accduration` is depreciated. Use `rescomp.valid_prediction_index` instead")
     n = pre.shape[axis]
     for i in range(n):
         if axis == 0:
@@ -28,6 +28,37 @@ def accduration(true, pre, tol=0.2, order="inf", axis=0):
         if relerr(t, p, order=order, axis=0) > tol:
             return i
     return n - 1
+
+def nrmse(true, pred, axis=0):
+    """ Normalized root mean squared error between two mxn arrays. 
+        Parameters
+        ----------
+        true (ndarray): mxn array of the true values.
+        pred (ndarray): mxn array of the predicted values
+        axis (int): Can be 0 or 1. Decide which axis to compute the error
+        Returns
+        -------
+        err (ndarray): If axis=0 returns length m array, if axis=1 returns length n array
+    """
+    sig = np.std(true, axis=axis)
+    other_axis = (axis + 1 ) % 2 # Sends 0 -> 1 and 1 -> 0
+    err = np.mean( (true - pred)**2 / sig, axis=other_axis)**.5
+    return err
+
+def valid_prediction_index(err, tol):
+    """ First index i where err[i] > tol. 
+        Parameters
+        ----------
+        err (ndarray): One dimensional array
+        tol (float): Max allowable error. 
+        Returns
+        -------
+        i (int): First index such that err[i] > tol
+    """
+    for i in range(len(err)):
+        if err[i] > tol:
+            return i
+    return i
 
 def system_fit_error(t, U, system, order="inf"):
     dt = np.mean(np.diff(t))
