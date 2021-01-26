@@ -1,6 +1,7 @@
 import rescomp as rc
 import numpy as np
 import findiff as fd
+from warnings import warn
 
 def L2(x, axis=0):
     return np.sum(x**2, axis=axis)**0.5
@@ -15,6 +16,7 @@ def relerr(true, pre, order=2, axis=0):
     return norm(true - pre, axis=axis) / norm(true, axis=axis)
 
 def accduration(true, pre, tol=0.2, order="inf", axis=0):
+    warn("The function `rescomp.accduration` is depreciated. Use `rescomp.validpredictiontime` instead")
     n = pre.shape[axis]
     for i in range(n):
         if axis == 0:
