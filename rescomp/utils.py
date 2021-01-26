@@ -40,9 +40,13 @@ def nrmse(true, pred, axis=0):
         -------
         err (ndarray): If axis=0 returns length m array, if axis=1 returns length n array
     """
-    sig = np.std(true, axis=axis)
+    sig = np.std(true, axis=axis, ddof=1) # Set ddof to match the R implementation of nrmse
     other_axis = (axis + 1 ) % 2 # Sends 0 -> 1 and 1 -> 0
-    err = np.mean( (true - pred)**2 / sig, axis=other_axis)**.5
+    normalized_sq_err = (true - pred)**2 / sig**2
+    if len(true.shape) == 1:
+        err = np.mean(normalized_sq_err)**.5
+    else:
+        err = np.mean(normalized_sq_err, axis=other_axis)**.5
     return err
 
 def valid_prediction_index(err, tol):

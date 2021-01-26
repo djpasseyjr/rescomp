@@ -1,5 +1,6 @@
 import unittest
 import rescomp as rc
+import numpy as np
 
 class TestExtras(unittest.TestCase):
 
@@ -26,11 +27,11 @@ class TestExtras(unittest.TestCase):
         # Compare with results from R (hydroGOF package)
         x = np.array([2,3,4,5])
         y = np.array([2,3,5,5])
-        assert np.isclose(rc.nrmse(x,y), 0.387)
+        assert np.isclose(rc.nrmse(x,y), 0.387298)
         A = np.array([[2,3],[4,5]])
-        B = np.array([2,3],[5,5]])
-        assert np.isclose(rc.nrmse(A,B, axis=1), np.array([0, 1]))
-        assert np.isclose(rc.nrmse(A,B, axis=0), np.array([.5, 0]))
+        B = np.array([[2,3],[5,5]])
+        assert np.all(np.isclose(rc.nrmse(A,B, axis=1), np.array([1, 0])))
+        assert np.all(np.isclose(rc.nrmse(A,B, axis=0), np.array([0, .5])))
         
     def test_valid_prediction_index(self):
         err = [0,0,0,0,0,0,0,1,0,0]
