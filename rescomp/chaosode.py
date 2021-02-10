@@ -45,6 +45,13 @@ def thomas(t, X, b=0.1998):
     (x, y, z) = unpack(X)
     return np.hstack((np.sin(y) - b * x, np.sin(z) - b * y, np.sin(x) - b * z))
 
+def dscc(t, X, R1=1.2, R2 = 3.44, R4 = 0.93, Ir = 2.25e-5, alpha = 11.6):
+    """ Compute time derivative of double-scroll chaotic circuit.
+    """
+    (x, y, z) = unpack(X)
+    return np.hstack(((x/R1 - (x-y)/R2-2*Ir*np.sinh(alpha*(x-y))),((x-y) / R2 - 2 * Ir * np.sinh(alpha * (x-y)))-z, y-R4 * z))
+
+
 SYSTEMS = {
     "lorenz" : {
         "domain_scale" : [20, 20, 20],
@@ -93,6 +100,22 @@ SYSTEMS = {
                         "sigma" : 1.5,
                         "spect_rad" : 12.0
         }
+    },
+    "dscc" : {
+        "domain_scale" : [0.1, 0.1, 0.1],
+        "domain_shift" : [0.1, 0.1, 0.1],
+        "signal_dim" : 3,
+        "time_to_attractor" : 40.0,
+        "df" : dscc,
+        "rcomp_params" : {
+                        "res_sz" : 1000,
+                        "activ_f" : lambda x: 1/(1 + np.exp(-1*x)),
+                        "gamma" : 5.632587,
+                        "mean_degree" : 0.21,
+                        "ridge_alpha" : 2e-7,
+                        "sigma" : 0.078,
+                        "spect_rad" : 14.6
+        }
     }
 }
 
@@ -108,7 +131,7 @@ def orbit(system, initial=None, duration=10, dt=0.01, trim=False):
        
         Parameters
         ----------
-        system (str): A supported dynamical system from ["lorenz", "thomas", "rossler"]
+        system (str): A supported dynamical system from ["lorenz", "thomas", "rossler","dscc"]
         initial (ndarray): An initial condition for the system. Defaults to a random choice.
         duration (float): Time duration of the orbit (default duration=10 means 10 seconds)
         dt (float): Timestep size. Default dt=0.01
