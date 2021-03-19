@@ -1,6 +1,6 @@
 language: python
 script:
-  - pip install coverage; coverage run tests.py
+  - pip install coverage; coverage run --source=./test -m unittest discover -s test/
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
