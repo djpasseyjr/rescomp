@@ -1,0 +1,6 @@
+language: python
+script:
+  - pip install coverage; coverage run tests.py
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
