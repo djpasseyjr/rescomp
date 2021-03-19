@@ -138,7 +138,7 @@ class DrivenResComp(ResComp):
         """
         # Determine initial condition
         if (u0 is not None):
-            r0 = self.initial_condition(u0)
+            r0 = self.initial_condition(u0, D[0, :])
         elif r0 is None :
             r0 = self.r0
         if not self.is_trained:
