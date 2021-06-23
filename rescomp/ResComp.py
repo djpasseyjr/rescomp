@@ -433,15 +433,16 @@ class ResComp:
         idxs = ()
         start = 0
         tmax = t[start] + time_window
-        for i,time in enumerate(t):
-            while time > tmax:
-                end = i
-                if end - start == 1:
+        mask = t > tmax
+        while np.any(mask):
+            end = np.argmax(mask)
+            if end - start == 1:
                     warn("rescomp.ResComp._partition partitioning time array into single entry arrays. Consider increasing time window")
                 idxs += ((start,end),)
                 diff = floor((end - start) * (1.0 - overlap))
                 start += max(diff, 1)
                 tmax = t[start] + time_window
+                mask = t > tmax
         if len(t)-start > 1:
             idxs += ((start, len(t)),)
         return idxs
