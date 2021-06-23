@@ -442,5 +442,6 @@ class ResComp:
                 diff = floor((end - start) * (1.0 - overlap))
                 start += max(diff, 1)
                 tmax = t[start] + time_window
-        idxs += ((start, len(t)),)
+        if len(t)-start > 1:
+            idxs += ((start, len(t)),)
         return idxs
