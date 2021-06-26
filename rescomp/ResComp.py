@@ -357,6 +357,10 @@ class ResComp:
         # the initial condition for the next batch. Overlap is removed after
         # the internal states are generated
         idxs = [(i, i + self.batchsize + 1) for i in range(0, len(t), self.batchsize)]
+        #Prevent length-1 segment at the end
+        if len(t)-idxs[-1][0] <= 1:
+            idxs = idxs[:-1]
+            idxs[-1] = (idxs[-1][0], len(t))
         # Set initial condition for reservoir nodes
         r0 = self.initial_condition(U[0, :])
         for start, end in idxs:
