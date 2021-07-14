@@ -121,7 +121,7 @@ class ResComp:
             try:
                 assert len(A.shape) == 2
             except AttributeError:
-                raise ValueError("ResComp mut be initialized with a numpy array or sparse scipy array")
+                raise ValueError("ResComp must be initialized with a numpy array or sparse scipy array")
             except AssertionError:
                 raise ValueError("ResComp must be initialized with a 2-d array")
             self.res = A
@@ -383,21 +383,21 @@ class ResComp:
 
     def predict(self, t, u0=None, r0=None, return_states=False):
         """ Predict the evolution of the learned system.
-        
+
             Parameters
             ----------
             t (ndarray): One dimensional array of time values
             u0 (ndarray): One dimensional array of initial conditions corresponding to the learned system
             r0 (ndarray): One dimensional array of initial conditions corresponding to reservoir nodes
             return_states (bool): Option to return states of the reservoir nodes in addition to prediction
-            
+
             Returns
             -------
-            pred (ndarray): Array with dimensions len(t) x self.signal_dim. Pred[i,:] is a prediction of 
+            pred (ndarray): Array with dimensions len(t) x self.signal_dim. Pred[i,:] is a prediction of
                 u(t[i]) where u is the learned signal
-            states (ndarray): Only returned if return_states is True. Reservoir node states. states[i] = r(t[i]) 
+            states (ndarray): Only returned if return_states is True. Reservoir node states. states[i] = r(t[i])
                 where r is the reservoir node states
-                
+
             Usage
             -----
             Typically, predict is passed the state of the reservoir nodes r0 at the end of training. EX.
@@ -405,9 +405,9 @@ class ResComp:
                 rcomp.train(train_t, U) # Automatically stores the last node state
                 r0 = rcomp.r0
                 prediction = rcomp.predict(test_t, r0=r0)
-            If you want to see how the reservoir computer predicts the trained system will respond to an 
+            If you want to see how the reservoir computer predicts the trained system will respond to an
             arbitrary initial condition try:
-                u0 = np.array([1.0, 1.0, 1.0])  
+                u0 = np.array([1.0, 1.0, 1.0])
                 prediction = rcomp.predict(test_t, u0=u0)
             Unless specialized training methods are used the above is likely to fail.
         """

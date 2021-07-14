@@ -24,7 +24,7 @@ class DrivenResComp(ResComp):
         transform_drive =  self.delta * self.W_drive @ d(t)
         return self.gamma*(-1*r + self.activ_f(self.res @ r + recurrence + transform_drive))
 
-    def initial_condition(self, u0, d0):
+    def initial_condition(self, u0):
         """ Function to map external system initial conditions to reservoir initial conditions """
         # u = lambda x: u0
         # d = lambda x: d0
@@ -58,7 +58,7 @@ class DrivenResComp(ResComp):
                     ti = time[start:end]
                     Ui = signal[start:end, :]
                     Di = input[start:end, :]
-                    self.update_tikhanov_factors(ti, Ui, Di)
+                    self._factors(ti, Ui, Di)
         else:
             idxs = self._partition(t, window, overlap=overlap)
             for start, end in idxs:
