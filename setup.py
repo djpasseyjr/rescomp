@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rescomp",
-    version="0.1.1",
+    version="0.1.2",
     author="DJ Passey",
     author_email="djpasseyjr@unc.edu",
     description="A reservoir computer and chaotic systems package",
@@ -23,7 +23,9 @@ setuptools.setup(
         'scipy',
         'numdifftools',
         'matplotlib',
-        'findiff'
+        'findiff',
+        'dill',
+        'parameter-sherpa'
     ],
     python_requires='>=3.6',
     test_suite='nose.collector',
