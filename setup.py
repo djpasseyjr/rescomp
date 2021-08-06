@@ -23,7 +23,9 @@ setuptools.setup(
         'scipy',
         'numdifftools',
         'matplotlib',
-        'findiff'
+        'findiff',
+        'dill',
+        'parameter-sherpa'
     ],
     python_requires='>=3.6',
     test_suite='nose.collector',
