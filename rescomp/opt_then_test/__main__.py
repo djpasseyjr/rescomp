@@ -11,7 +11,7 @@ parser = get_parser()
 args = parser.parse_args()
 
 ###Imports
-from rescomp.optimizer import ResCompOptimizer, get_system
+from rescomp.optimizer import ResCompOptimizer, get_system, load_from_file
 
 import dill as pkl
 

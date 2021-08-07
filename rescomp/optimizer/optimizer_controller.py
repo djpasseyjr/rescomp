@@ -82,7 +82,7 @@ class ResCompOptimizer:
             algorithm (str or sherpa.Algorithm): the algorithm to use for optimizing. Must be either a sherpa.algorithms.Algorithm object or one of 'grid_search', 'random_search', 'gpyopt', 'successive_halving', 'local_search', or 'population'. Note that local_search will ignore opt_ntrials, and grid_search will only repeat approximately opt_ntrials times, due to their implementations.
             max_stderr (float or None): if not None, ensures that the standard error for the mean is at most this value for each hyperparameter configuration.
             sherpa_dashboard (bool): whether to use the sherpa dashboard. Default false."""
-        self._initialize_sherpa(opt_ntrials, sherpa_dashboard)
+        self._initialize_sherpa(opt_ntrials, algorithm, sherpa_dashboard)
         for trial in self.study:
             try:
                 exp_vpt, stderr = self.run_single_vpt_test(vpt_reps, trial.parameters)
@@ -230,7 +230,7 @@ class ResCompOptimizer:
         self.node_count = len(client.ids)
         print(f"Using multithreading; running on {self.node_count} engines.")
     
-    def _initialize_sherpa(self, opt_ntrials, algorithm='gpyopt', sherpa_dashboard=False):
+    def _initialize_sherpa(self, opt_ntrials, algorithm, sherpa_dashboard=False):
         """Initializes the sherpa study used internally"""
         #Initialize the algorithm if needed
         if isinstance(algorithm, sherpa.algorithms.Algorithm):
@@ -257,7 +257,7 @@ class ResCompOptimizer:
             algorithm_obj = sherpa.algorithms.PopulationBasedTraining(num_generations=num_generations,
                         population_size=population_size,parameter_range=parameter_range)
         else:
-            raise ValueError("algorithm parameter must be a sherpa.algorithms.Algorithm object or one of 'grid_search', 'random_search', 'gpyopt', 'successive_halving', 'local_search', or 'population'")
+            raise ValueError(f"algorithm parameter must be a sherpa.algorithms.Algorithm object or one of 'grid_search', 'random_search', 'gpyopt', 'successive_halving', 'local_search', or 'population', not {algorithm}.")
         
         #Initialize the study
         self.study = sherpa.Study(parameters=self.opt_parameters,

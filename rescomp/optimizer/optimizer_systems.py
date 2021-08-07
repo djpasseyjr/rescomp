@@ -65,7 +65,7 @@ def load_from_file(filename, key):
         mod = import_module(modname)
         return getattr(mod, key)
     except ModuleNotFoundError:
-        raise FileNotFoundError(f"could not find '{filename}.'")
+        raise FileNotFoundError(f"could not find '{filename}'.")
 
 def loadprior(system_name, parameters, datadir):
     """Load best parameters from random searches (Computed previously).
