@@ -1,3 +1,4 @@
 graft tests
 graft images
+graft rescomp/optimizer/data
 global-exclude *.py[cod]
