@@ -73,7 +73,7 @@ class ResCompOptimizer:
         if parallel:
             self._initialize_parallelization(parallel_profile)
             
-    def run_optimization(self, opt_ntrials, vpt_reps, algorithm='gpyopt', max_stderr=None, sherpa_dashboard=False):
+    def run_optimization(self, opt_ntrials, vpt_reps, algorithm='gpyopt', max_stderr=None, sherpa_dashboard=False, raise_err=False):
         """Runs the optimization process.
         
         Arguments:
@@ -81,11 +81,12 @@ class ResCompOptimizer:
             vpt_reps (int): number of times to try each parameter set
             algorithm (str or sherpa.Algorithm): the algorithm to use for optimizing. Must be either a sherpa.algorithms.Algorithm object or one of 'grid_search', 'random_search', 'gpyopt', 'successive_halving', 'local_search', or 'population'. Note that local_search will ignore opt_ntrials, and grid_search will only repeat approximately opt_ntrials times, due to their implementations.
             max_stderr (float or None): if not None, ensures that the standard error for the mean is at most this value for each hyperparameter configuration.
-            sherpa_dashboard (bool): whether to use the sherpa dashboard. Default false."""
+            sherpa_dashboard (bool): whether to use the sherpa dashboard. Default false.
+            raise_err (bool): whether errors occuring during VPT calculations should be raised; otherwise are suppressed and a VPT of -1 is reported"""
         self._initialize_sherpa(opt_ntrials, algorithm, sherpa_dashboard)
         for trial in self.study:
             try:
-                exp_vpt, stderr = self.run_single_vpt_test(vpt_reps, trial.parameters)
+                exp_vpt, stderr = self.run_single_vpt_test(vpt_reps, trial.parameters, raise_err=raise_err)
             except Exception as e:
                 #print relevant information for debugging
                 print("Trial parameters at error:", trial.parameters)
@@ -166,28 +167,41 @@ class ResCompOptimizer:
         
         return results
     
-    def run_single_vpt_test(self, vpt_reps, trial_params, max_stderr=None):
+    def run_single_vpt_test(self, vpt_reps, trial_params, max_stderr=None, raise_err=False):
         """Returns the mean and standard error of valid prediction time (VPT) resulting from the current and specified parameters."""
+        
+        if max_stderr is not None:
+            if max_stderr <= 0:
+                raise ValueError("maximum standard error must be positive!")
         
         total_count = 0
         vpts = []
-        while True:
-            if self.parallel:
-                new_vpts, ct = self._run_n_times_parallel(vpt_reps, vpt,
-                            self.system, self.prediction_type, **self.res_params, **trial_params)
-            else:
-                new_vpts = self._run_n_times(vpt_reps, vpt,
-                            self.system, self.prediction_type, **self.res_params, **trial_params)
-                ct = vpt_reps
-            
-            total_count += ct
-            vpts += new_vpts
-            if max_stderr is None:
-                break
-            else:
-                stderr = np.std(vpts)/np.sqrt(total_count)
-                if stderr < max_stderr:
+        try:
+            while True:
+                if self.parallel:
+                    new_vpts, ct = self._run_n_times_parallel(vpt_reps, vpt,
+                                self.system, self.prediction_type, **self.res_params, **trial_params)
+                else:
+                    new_vpts = self._run_n_times(vpt_reps, vpt,
+                                self.system, self.prediction_type, **self.res_params, **trial_params)
+                    ct = vpt_reps
+                
+                total_count += ct
+                vpts += new_vpts
+                if max_stderr is None:
                     break
+                else:
+                    stderr = np.std(vpts)/np.sqrt(total_count)
+                    if stderr < max_stderr:
+                        break
+        except Exception as e:
+            if raise_err:
+                raise
+            else:
+                print(f"{type(e).__name__}: {str(e)}")
+                print(f"Trial parameters: {trial_params}:")
+                print("Returning VPT as -1")
+                return -1, 0
         
         return np.mean(vpts), np.std(vpts)/np.sqrt(total_count)
         
@@ -233,6 +247,8 @@ class ResCompOptimizer:
     def _initialize_sherpa(self, opt_ntrials, algorithm, sherpa_dashboard=False):
         """Initializes the sherpa study used internally"""
         #Initialize the algorithm if needed
+        if isinstance(algorithm, str):
+            algorithm = algorithm.lower()
         if isinstance(algorithm, sherpa.algorithms.Algorithm):
             algorithm_obj = algorithm
         elif algorithm == 'grid_search':

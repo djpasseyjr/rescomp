@@ -378,7 +378,14 @@ class ResComp:
         """ Solve the Tikhonov regularized least squares problem (Ridge regression)
             for W_out (The readout mapping)
         """
-        W_out = self.Yhat @ np.linalg.inv(self.Rhat + self.ridge_alpha * np.eye(self.res_sz))
+        #Check that Rhat and Yhat aren't overflowed
+        if not (np.all(np.isfinite(self.Rhat)) and np.all(np.isfinite(self.Yhat))):
+            raise OverflowError('overflow occurred while computing regression')
+        try:
+            W_out = self.Yhat @ np.linalg.inv(self.Rhat + self.ridge_alpha * np.eye(self.res_sz))
+        except np.linalg.LinAlgError:
+            #Try the pseudoinverse instead
+            W_out = self.Yhat @ np.linalg.pinv(self.Rhat + self.ridge_alpha * np.eye(self.res_sz))
         return W_out
 
     def predict(self, t, u0=None, r0=None, return_states=False):
