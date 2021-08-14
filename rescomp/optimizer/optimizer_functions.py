@@ -205,6 +205,7 @@ def trained_rcomp(system, tr, Utr, res_ode=None, **opt_params):
         rcomp.train(tr, *Utr, **methodprms)
     else:
         rcomp.train(tr, Utr, **methodprms)
+        
     return rcomp
     
 def rcomp_prediction(system, rcomp, predargs, init_cond):
@@ -290,7 +291,7 @@ def nrmse(true, pred):
 
 def valid_prediction_index(err, tol):
     """First index i where err[i] > tol. err is assumed to be 1D and tol is a float. If err is never greater than tol, then len(err) is returned."""
-    mask = err > tol
+    mask = np.logical_or(err > tol, ~np.isfinite(err))
     if np.any(mask):
         return np.argmax(mask)
     return len(err)

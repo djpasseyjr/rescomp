@@ -38,6 +38,7 @@ def get_parser():
     #Additional options
     parser.add_argument('-o','--ode', type=str, help='.py or .pkl file containing alternate reservoir ODE to use', default=None)
     
+    parser.add_argument('--algorithm', type=str, help='sherpa hyperparameter optimization algorithm to use', default='population')
     parser.add_argument('--datadir', type=str, help='Directory to look for prior files in, with name [system]_prior.pkl.', default='')
     parser.add_argument('--debug', help='Run in debug mode', action='store_true')
     parser.add_argument('--use-dashboard', help='Enable the Sherpa dashboard. Not supported on Windows', action='store_true')
