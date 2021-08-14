@@ -93,7 +93,7 @@ if __name__=="__main__":
     
     #Run the optimization ########################
     rcoptimizer.run_optimization(opt_ntrials, opt_vpt_reps, max_stderr=args.max_stderr,
-            sherpa_dashboard=args.use_dashboard, algorithm='population')
+            sherpa_dashboard=args.use_dashboard, algorithm=args.algorithm)
     print("Optimization ran succesfully")
     
     #Run the tests ###############################
