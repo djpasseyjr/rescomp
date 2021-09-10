@@ -118,10 +118,7 @@ For details on what parameters it accepts, run it as:
 python3 -m rescomp.opt_then_test -h
 ```
 
-## Conclusion
-
-Most high level functions are well documented in the source code and should describe the variables clearly. Good luck!
-
+## References 
 
 [1] Griffith, A., Pomerance, A., Gauthier, D.. [Forecasting Chaotic Systems with Very Low Connectivity Reservoir
 Computers](https://arxiv.org/pdf/1910.00659.pdf) (2019)
