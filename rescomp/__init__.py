@@ -1,4 +1,4 @@
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 from .ResComp import ResComp
 from .DrivenResComp import DrivenResComp
 from .chaosode import lorenz, rossler, thomas, random_initial, orbit, plot3d, plot2d, SYSTEMS
