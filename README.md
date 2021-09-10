@@ -2,6 +2,7 @@
 
 This package contains an ode based reservoir computer for learning time series data.
 The package also includes functions for generating and plotting time series data for three chaotic systems.
+It additionally contains a module that implements hyperparameter optimization for reservoir computers via the sherpa package.
 
 ## Installation
 The package is hosted on PyPi and can be installed with pip:
@@ -10,7 +11,7 @@ pip install rescomp
 ```
 Alternatively, users can download the repository and add the location of the repo to their Python path.
 
-Import the package with `import rescomp as rc`
+Import the package with `import rescomp as rc`.
 
 ## Chaotic Systems
 
@@ -90,6 +91,32 @@ fig = rc.plot3d(pre)
 ![Prediction with optimized parameters. (Good!)](https://raw.githubusercontent.com/djpasseyjr/rescomp/main/images/optrcomp.png)
 
 This prediction looks much more like Thomas' attractor.
+
+## Hyperparameter Optimization
+The `rescomp.optimizer` package contains a class, `ResCompOptimizer`, that allows for easily performing hyperparameter optimization on a `ResComp` or `DrivenResComp` object:
+```
+from rescomp.optimizer import ResCompOptimizer
+
+rcopt = ResCompOptimizer('thomas', 'relax', 'random', 'augmented')
+rcopt.run_optimization(50, 20)
+optimized_hyperparams = rcopt.get_best_result()
+```
+Also of note are the methods `generate_orbits()` and `run_tests()`.
+`generate_orbits()` will generate a given number of orbits from the system as well as the reservoir computer's prediction, which is useful for visual comparisons.
+`run_tests()` will test the reservoir computer on continued and random predictions with the given hyperparameters, as well as calculate the derivative fit of its predictions and estimate the Lyapunov exponent of the reservoir dynamical system.
+
+There are four built-in systems: the Lorenz, Thomas, and Rossler chaotic attractors, as described above; and a set of data from a soft robot dynamical system.
+Other systems can be created by extending the `rescomp.optimizer.System` class, and can be passed to the optimizer instead of the system string.
+
+There is also a script module, `rescomp.opt_then_test`, that will run hyperparameter optimization on a `ResComp` on a given system, run various tests on the optimized hyperparameters, and save the results.
+The script can be run as follows:
+```
+python3 -m rescomp.opt_then_test [args]
+```
+For details on what parameters it accepts, run it as:
+```
+python3 -m rescomp.opt_then_test -h
+```
 
 ## Conclusion
 
