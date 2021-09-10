@@ -120,7 +120,7 @@ def meanlyap(system, rcomp, pre, r0, ts, pert_size=1e-6, lyap_reps=20):
         lam += rc.lyapunov(ts[:i], pre[:i, :], predelta[:i, :], delta0)
     return lam / lyap_reps
     
-def create_orbit(*args, **kwargs):
+def create_orbit(*args, return_rescomp=False, **kwargs):
     """ 
     Trains a reservoir computer and has it predict, using the given arguments
     
@@ -148,7 +148,10 @@ def create_orbit(*args, **kwargs):
     init_cond = make_initial(pred_type, rcomp, Uts)
     pre = rcomp_prediction(system, rcomp, ts, init_cond)
     
-    return tr, Utr, ts, Uts, pre
+    if return_rescomp:
+        return rcomp, tr, Utr, ts, Uts, pre
+    else:
+        return tr, Utr, ts, Uts, pre
 
 #########################
 ## Rescomp creation

@@ -34,7 +34,7 @@ class ResCompOptimizer:
                 parallel=False, parallel_profile=None, **res_params):
         """
         Arguments:
-            system (string or template.System): the system to use. If not a template.System object, will attempt to load one using rescomp.optimizer.get_system(system)
+            system (string or rescomp.optimizer.System): the system to use. If not a rescomp.optimizer.System object, will attempt to load one using rescomp.optimizer.get_system(system)
             map_initial (string): initial condition mapping for reservoir computer to use
             prediction_type (string): 'random' or 'continue'; prediction type to use while optimizing.
             method (string): training method; 'standard' or 'augmented'
@@ -141,7 +141,7 @@ class ResCompOptimizer:
                 results_dict["rand_deriv_fit"].append(rand_df)
         return results_dict
     
-    def generate_orbits(self, n_orbits, parameters=None):
+    def generate_orbits(self, n_orbits, parameters=None, return_rescomp=False):
         """
         Trains a reservoir computer and has it predict, using the given hyperparameters
         If parameters are not specified, uses the optimized hyperparameters.
@@ -158,12 +158,12 @@ class ResCompOptimizer:
             
         if self.parallel:
             results, _ = self._run_n_times_parallel(n_orbits, create_orbit,
-                        self.system, self.prediction_type, **self.res_params, **parameters)
+                        self.system, self.prediction_type, **self.res_params, **parameters, return_rescomp=return_rescomp)
             #Collapse into single list of outputs
             results = [item for sublist in results for item in sublist]
         else:
             results = self._run_n_times(n_orbits, create_orbit,
-                        self.system, self.prediction_type, **self.res_params, **parameters)
+                        self.system, self.prediction_type, **self.res_params, **parameters, return_rescomp=return_rescomp)
         
         return results
     
