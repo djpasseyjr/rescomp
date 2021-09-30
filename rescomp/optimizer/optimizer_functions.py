@@ -181,28 +181,35 @@ def trained_rcomp(system, tr, Utr, res_ode=None, **opt_params):
         rcomp (ResComp): Trained reservoir computer
     """
     resprms, methodprms, otherprms = build_params(system, opt_params)
-    if system.is_driven:
-        rcomp = rc.DrivenResComp(**resprms)
-    else:
-        rcomp = rc.ResComp(**resprms)
     
-    if res_ode is not None:
-        #ResComp and DrivenResComp call the ODE functions different things
+    if 'ResComp' in opt_params.keys():
+        #Use provided rescomp constructor if given
+        #Should handle all parameters
+        otherprms.pop('ResComp')
+        rcomp = opt_params['ResComp'](**resprms, **otherprms)
+    else:
         if system.is_driven:
-            bind_function(rcomp, res_ode['res_ode'], 'res_f')
-            bind_function(rcomp, res_ode['trained_res_ode'], 'res_pred_f')
+            rcomp = rc.DrivenResComp(**resprms)
         else:
-            bind_function(rcomp, res_ode['res_ode'], 'res_ode')
-            bind_function(rcomp, res_ode['trained_res_ode'], 'trained_res_ode')
-        initial = res_ode.get('initial_condition')
-        if initial is not None:
-            bind_function(rcomp, initial, 'initial_condition')
-            
-    for var in otherprms.keys():
-        if callable(otherprms[var]):
-            bind_function(rcomp, otherprms[var], var)
-        else:
-            setattr(rcomp, var, otherprms[var])
+            rcomp = rc.ResComp(**resprms)
+        
+        if res_ode is not None:
+            #ResComp and DrivenResComp call the ODE functions different things
+            if system.is_driven:
+                bind_function(rcomp, res_ode['res_ode'], 'res_f')
+                bind_function(rcomp, res_ode['trained_res_ode'], 'res_pred_f')
+            else:
+                bind_function(rcomp, res_ode['res_ode'], 'res_ode')
+                bind_function(rcomp, res_ode['trained_res_ode'], 'trained_res_ode')
+            initial = res_ode.get('initial_condition')
+            if initial is not None:
+                bind_function(rcomp, initial, 'initial_condition')
+                
+        for var in otherprms.keys():
+            if callable(otherprms[var]):
+                bind_function(rcomp, otherprms[var], var)
+            else:
+                setattr(rcomp, var, otherprms[var])
         
     if system.is_driven:
         rcomp.train(tr, *Utr, **methodprms)
