@@ -117,11 +117,14 @@ def loadprior(system_name, parameters, datadir):
 # Predefined systems
 #####################
     
-def get_system(system_name):
+def get_system(system_name, **kwargs):
     """
     Gets the system with the given name.
     If system_name is one of 'lorenz', 'thomas', 'rossler', or 'softrobot', uses the predefined system object.
     Otherwise, attempts to load a file.
+    
+    For 'lorenz', 'thomas', 'rossler', and 'softrobot', the train_time, test_time, and dt parameters can be
+    specified as  keyword arguments.
     
     Returns a rescomp.optimizer.System object
     """
@@ -131,12 +134,23 @@ def get_system(system_name):
     #   -test time
     #   -dt
     if system_name == 'lorenz':
-        return ChaosODESystem('lorenz', 6.6, 8, 0.01)
+        params = {'train_time':6.6, 'test_time':8., 'dt':0.01}
+        params = {**params, **kwargs}
+        return ChaosODESystem('lorenz', **params)
+    
     elif system_name == 'rossler':
-        return ChaosODESystem('rossler', 165, 120, 0.01)
+        params = {'train_time':165, 'test_time':120, 'dt':0.01}
+        params = {**params, **kwargs}
+        return ChaosODESystem('rossler', **params)
+    
     elif system_name == 'thomas':
-        return ChaosODESystem('thomas', 660, 360, 0.1)
+        params = {'train_time':660, 'test_time':360, 'dt':0.1}
+        params = {**params, **kwargs}
+        return ChaosODESystem('thomas', **params)
+    
     elif system_name == 'softrobot':
+        params = {'train_time':165, 'test_time':80, 'dt':0.01}
+        params = {**params, **kwargs}
         return SoftRobotSystem(165, 80, 0.01)
     else:
         try:

@@ -7,5 +7,5 @@ Also of note is the System class, which can be used for defining systems.
 
 from .optimizer_controller import ResCompOptimizer
 from .optimizer_functions import *
-from .optimizer_systems import get_res_defaults, load_from_file, loadprior, get_system
+from .optimizer_systems import get_res_defaults, load_from_file, loadprior, get_system, ChaosODESystem, SoftRobotSystem
 from .templates import random_slice, System
