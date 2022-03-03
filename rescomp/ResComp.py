@@ -231,8 +231,10 @@ class ResComp:
                 This typically conincided with the fixed point above but unlike the nonlinear solver, this method
                 always converged.
             "activ_f"
-                This sets the reservoir initial condition to r0 = activ_f(W_in @ u0). Incidentally, should send
+                This sets the reservoir initial condition to r0 = activ_f(sigma * W_in @ u0). Incidentally, should send
                 the reservoir initial condition close to the attracting fixed points of the system
+            "activ_f_unscaled"
+                This sets the reservoir initial condition to r0 = activ_f(sigma * W_in @ u0). Included for legacy reasons.
             "pseudoinverse"
                 Only for use after training. This uses the pseudoinverse of W_out to compute the initial node
                 state from an inital condition from the learned system
@@ -255,6 +257,8 @@ class ResComp:
             if  err > 1e-12:
                 warn(f"Reservoir fixed point failed to converge. ||r_n - r_(n+1)|| = {err}")
         elif self.map_initial == "activ_f":
+            r0 = self.activ_f(self.W_in @ (self.sigma * u0))
+        elif self.map_initial == "activ_f_unscaled":
             r0 = self.activ_f(self.W_in @ u0)
         elif self.map_initial == "pseudoinverse":
             if not self.is_trained:
