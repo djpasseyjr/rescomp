@@ -4,6 +4,8 @@
 from ipyparallel import Client
 import sherpa
 import numpy as np
+import os
+import dill as pickle
 
 from .optimizer_systems import get_system, loadprior
 from .templates import System
@@ -30,7 +32,7 @@ class ResCompOptimizer:
             node_count (int): number of nodes in use
     """
     def __init__(self, system, map_initial, prediction_type, method, res_ode=None,
-                add_params=None, rm_params=None, results_directory="", data_directory="",
+                add_params=None, rm_params=None, results_directory=None, data_directory="", progress_file=None,
                 parallel=False, parallel_profile=None, **res_params):
         """
         Arguments:
@@ -44,8 +46,10 @@ class ResCompOptimizer:
             add_params: list of sherpa.Parameter objects to include in optimization
             rm_params (list of str): names of optimization parameters to remove
             
-            results_directory (str): pathname of where to store optimization results. Default will store in current directory.
+            results_directory (str or None): pathname of where to store sherpa's optimization results. Default will not save.
             data_directory (str): pathname to load additional priors from
+            progress_file (str or None): file to save optimization progress to. If the file exists, it will be loaded from. More
+                flexible than results_directory.
             
             parallel (bool): whether to use parallelization. Default false
             parallel_profile (str or None): when using parallelization, the ipyparallel profile to connect to.
@@ -59,6 +63,17 @@ class ResCompOptimizer:
         else:
             self.system = system
         self.prediction_type = prediction_type
+        
+        # Initialize observations
+        self.progress_file = progress_file
+        if progress_file is not None and os.path.exists(progress_file):
+            try:
+                with open(progress_file, 'rb') as file:
+                    self.opt_observations = pickle.load(file)
+            except Exception as e:
+                self.opt_observations = []
+        else:
+            self.opt_observations = []
         
         self.parallel = parallel
         self.results_directory = results_directory
@@ -84,7 +99,19 @@ class ResCompOptimizer:
             sherpa_dashboard (bool): whether to use the sherpa dashboard. Default false.
             raise_err (bool): whether errors occuring during VPT calculations should be raised; otherwise are suppressed and a VPT of -1 is reported"""
         self._initialize_sherpa(opt_ntrials, algorithm, sherpa_dashboard)
+        # Include pre-observed trials
+        N = len(self.opt_observations)
+        for i,obs in enumerate(self.opt_observations):
+            trial = sherpa.core.Trial(i-N, obs[0])
+            self.study.add_trial(trial)
+            self.study.add_observation(trial=trial,
+                           objective=obs[1],
+                           context={'vpt_stderr':obs[2]})
+            self.study.finalize(trial)
+        
         for trial in self.study:
+            if trial.id < 0:
+                continue
             try:
                 exp_vpt, stderr = self.run_single_vpt_test(vpt_reps, trial.parameters, raise_err=raise_err)
             except Exception as e:
@@ -92,11 +119,17 @@ class ResCompOptimizer:
                 print("Trial parameters at error:", trial.parameters)
                 print("Other parameters:", self.res_params)
                 raise e
+            self.opt_observations.append((trial.parameters, exp_vpt, stderr))
             self.study.add_observation(trial=trial,
                               objective=exp_vpt,
                               context={'vpt_stderr':stderr})
             self.study.finalize(trial)
-            self.study.save(self.results_directory)
+            if self.results_directory is not None:
+                self.study.save(self.results_directory)
+            # Save in a way that's more flexible
+            if self.progress_file is not None:
+                with open(self.progress_file, 'wb') as file:
+                    pickle.dump(self.opt_observations, file)
     
     def run_tests(self, test_ntrials, lyap_reps=20, parameters=None):
         """
