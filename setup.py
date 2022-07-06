@@ -25,7 +25,8 @@ setuptools.setup(
         'matplotlib',
         'findiff',
         'dill',
-        'parameter-sherpa'
+        'parameter-sherpa',
+        'ipyparallel'
     ],
     python_requires='>=3.6',
     test_suite='nose.collector',
