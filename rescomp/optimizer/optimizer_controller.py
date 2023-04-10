@@ -75,7 +75,7 @@ class ResCompOptimizer:
         else:
             self.opt_observations = []
         
-        self.parallel = parallel
+        self.parallel = parallel or (parallel_profile is not None)
         self.results_directory = results_directory
         
         self.opt_parameters, self.opt_param_names = get_paramlist(self.system, method,
