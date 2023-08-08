@@ -19,7 +19,7 @@ setuptools.setup(
     ],
     install_requires=[
         'numpy',
-        'networkx',
+        'networkx>=2.7,<3.0',
         'scipy',
         'numdifftools',
         'matplotlib',
