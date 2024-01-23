@@ -169,7 +169,7 @@ class ResComp:
                 max_eig = A[i,i]
             else:
                 # Compute spectral radius of strongly connected components
-                adj = nx.adj_matrix(nx.subgraph(g,cmp))
+                adj = nx.adjacency_matrix(nx.subgraph(g,cmp))
                 max_eig = np.max(np.abs(np.linalg.eigvals(adj.T.toarray())))
             if max_eig > rad:
                 rad = max_eig
